@@ -6,18 +6,16 @@ def validate_process_request(data: Dict[str, Any]) -> bool:
     
     Expected format:
     {
-        "query": str,
-        "response": str
+        "query": str
     }
     """
     if not isinstance(data, dict):
         return False
         
-    required_fields = ['query', 'response']
-    if not all(field in data for field in required_fields):
+    if 'query' not in data:
         return False
         
-    if not all(isinstance(data[field], str) for field in required_fields):
+    if not isinstance(data['query'], str):
         return False
         
     return True
