@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+    <title>Quantum State Analysis Dashboard</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <style>
+        .quantum-state {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .quantum-state:hover {
+            transform: translateX(5px);
+        }
+        .quantum-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bs-gray-800);
+            padding: 0.5rem;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+        }
+        .quantum-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bs-gray-700);
+            color: var(--bs-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .quantum-btn:hover {
+            background: var(--bs-gray-600);
+            transform: scale(1.1);
+        }
+        .quantum-btn.active {
+            background: var(--bs-primary);
+        }
+        .wave-container {
+            height: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+        .confidence-wave {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        .mini-gauge {
+            width: 60px;
+            height: 30px;
+            position: relative;
+        }
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            color: var(--bs-light);
+        }
+        .analysis-card {
+            background: var(--bs-gray-800);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form id="analysisForm">
+                            <div class="mb-3">
+                                <label for="queryText" class="form-label">Enter text to analyze:</label>
+                                <textarea 
+                                    class="form-control" 
+                                    id="queryText" 
+                                    rows="4" 
+                                    required 
+                                    placeholder="Type or paste your text here for quantum state analysis..."></textarea>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary" id="analyzeBtn">
+                                    <span class="submit-text">Analyze</span>
+                                    <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Analysis Dashboard -->
+                <div id="analysisDashboard" class="card">
+                    <div class="card-body">
+                        <!-- Quantum State Toolbar -->
+                        <div class="quantum-toolbar">
+                            <button type="button" class="quantum-btn" data-state="cold">❄️</button>
+                            <button type="button" class="quantum-btn" data-state="causal">🔄</button>
+                            <button type="button" class="quantum-btn" data-state="entangled">⚡️</button>
+                            <button type="button" class="quantum-btn" data-state="superposition">🌊</button>
+                        </div>
+
+                        <!-- Analysis Results -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="analysis-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="state-emoji">❄️</span>
+                                            <span class="state-name fw-bold">COLD</span>
+                                        </div>
+                                        <div class="mini-gauge">
+                                            <svg viewBox="0 0 60 30">
+                                                <path d="M 5 25 A 25 25 0 0 1 55 25" fill="none" stroke="var(--bs-gray-600)" stroke-width="4"/>
+                                                <path class="gauge-path" d="M 5 25 A 25 25 0 0 1 55 25" fill="none" stroke="var(--bs-primary)" stroke-width="4"/>
+                                            </svg>
+                                            <div class="gauge-value">85%</div>
+                                        </div>
+                                    </div>
+                                    <div class="wave-container mb-3">
+                                        <svg class="confidence-wave" viewBox="0 0 100 30" preserveAspectRatio="none">
+                                            <path class="wave-path" fill="none" stroke="var(--bs-primary)" stroke-width="2"/>
+                                        </svg>
+                                    </div>
+                                    <div class="details-content small">
+                                        <div class="mb-2">
+                                            <div class="fw-bold mb-1">Description</div>
+                                            <div class="text-muted">High certainty state based on empirical evidence</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <div class="fw-bold mb-1">Evidence</div>
+                                            <ul class="text-muted mb-0 ps-3">
+                                                <li>Multiple peer-reviewed sources</li>
+                                                <li>Empirical data support</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="analysis-card">
+                                    <h6 class="mb-3">Entanglements</h6>
+                                    <div class="entanglement-list">
+                                        <!-- Entanglement items will be added here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Wave animation
+        function updateWave() {
+            const path = document.querySelector('.wave-path');
+            const width = 100;
+            const height = 30;
+            const points = [];
+            const amplitude = 10;
+            const frequency = 0.2;
+            const phase = Date.now() * 0.005;
+
+            for (let x = 0; x <= width; x++) {
+                const y = height/2 + Math.sin((x * frequency) + phase) * amplitude;
+                points.push(`${x},${y}`);
+            }
+
+            path.setAttribute('d', `M ${points.join(' L ')}`);
+            requestAnimationFrame(updateWave);
+        }
+
+        // Initialize wave animation
+        updateWave();
+
+        // Quantum toolbar interaction
+        document.querySelectorAll('.quantum-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.quantum-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const state = btn.dataset.state;
+                const details = getStateDetails(state);
+                updateAnalysisCard(details);
+            });
+        });
+
+        function getStateDetails(state) {
+            const states = {
+                cold: {
+                    emoji: '❄️',
+                    name: 'COLD',
+                    confidence: 85,
+                    description: 'High certainty state based on empirical evidence',
+                    evidence: ['Multiple peer-reviewed sources', 'Empirical data support']
+                },
+                causal: {
+                    emoji: '🔄',
+                    name: 'CAUSAL',
+                    confidence: 75,
+                    description: 'Strong causal relationship identified',
+                    evidence: ['Direct correlation observed', 'Temporal sequence verified']
+                },
+                entangled: {
+                    emoji: '⚡️',
+                    name: 'ENTANGLED',
+                    confidence: 95,
+                    description: 'Quantum entanglement detected',
+                    evidence: ['Strong correlation', 'Bidirectional influence']
+                },
+                superposition: {
+                    emoji: '🌊',
+                    name: 'SUPERPOSITION',
+                    confidence: 50,
+                    description: 'Multiple concurrent states detected',
+                    evidence: ['State uncertainty', 'Multiple possibilities']
+                }
+            };
+            return states[state];
+        }
+
+        function updateAnalysisCard(details) {
+            const card = document.querySelector('.analysis-card');
+            card.querySelector('.state-emoji').textContent = details.emoji;
+            card.querySelector('.state-name').textContent = details.name;
+            card.querySelector('.gauge-value').textContent = `${details.confidence}%`;
+
+            // Update gauge
+            const gaugePath = card.querySelector('.gauge-path');
+            const gaugeLength = gaugePath.getTotalLength();
+            const gaugeProgress = (details.confidence / 100) * gaugeLength;
+            gaugePath.style.strokeDasharray = `${gaugeProgress} ${gaugeLength}`;
+
+            // Update content
+            const content = card.querySelector('.details-content');
+            content.innerHTML = `
+                <div class="mb-2">
+                    <div class="fw-bold mb-1">Description</div>
+                    <div class="text-muted">${details.description}</div>
+                </div>
+                <div class="mb-2">
+                    <div class="fw-bold mb-1">Evidence</div>
+                    <ul class="text-muted mb-0 ps-3">
+                        ${details.evidence.map(e => `<li>${e}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Form submission
+        document.getElementById('analysisForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const spinner = analyzeBtn.querySelector('.spinner-border');
+            const submitText = analyzeBtn.querySelector('.submit-text');
+
+            // Show loading state
+            analyzeBtn.disabled = true;
+            spinner.classList.remove('d-none');
+            submitText.textContent = 'Analyzing...';
+
+            // Simulate analysis (replace with actual API call)
+            setTimeout(() => {
+                analyzeBtn.disabled = false;
+                spinner.classList.add('d-none');
+                submitText.textContent = 'Analyze';
+                document.getElementById('analysisDashboard').style.display = 'block';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html data-bs-theme="dark">
 <head>
@@ -27,42 +26,186 @@
             height: 32px;
             border-radius: 50%;
             border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: var(--bs-gray-700);
             color: var(--bs-light);
             cursor: pointer;
+            transition: all 0.2s ease;
         }
         .quantum-btn:hover {
             background: var(--bs-gray-600);
+            transform: scale(1.1);
+        }
+        .quantum-btn.active {
+            background: var(--bs-primary);
+        }
+        .wave-container {
+            height: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+        .confidence-wave {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        .mini-gauge {
+            width: 60px;
+            height: 30px;
+            position: relative;
+        }
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            color: var(--bs-light);
+        }
+        .analysis-card {
+            background: var(--bs-gray-800);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h1>Quantum State Analysis</h1>
-        <div class="quantum-toolbar">
-            <button class="quantum-btn">⚛</button>
-            <button class="quantum-btn">🔄</button>
-            <button class="quantum-btn">📊</button>
-        </div>
-        <div class="input-group mb-3">
-            <input type="text" class="form-control" id="analysis-input" placeholder="Enter text to analyze">
-            <button class="btn btn-primary" type="button" id="analyze-btn">Analyze</button>
-        </div>
-        <div id="analysis-container">
-            <!-- Analysis results will be displayed here -->
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form id="analysisForm">
+                            <div class="mb-3">
+                                <label for="queryText" class="form-label">Enter text to analyze:</label>
+                                <textarea 
+                                    class="form-control" 
+                                    id="queryText" 
+                                    rows="4" 
+                                    required 
+                                    placeholder="Type or paste your text here for quantum state analysis..."></textarea>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary" id="analyzeBtn">
+                                    <span class="submit-text">Analyze</span>
+                                    <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Analysis Dashboard -->
+                <div id="analysisDashboard" class="card d-none">
+                    <div class="card-body">
+                        <!-- Quantum State Toolbar -->
+                        <div class="quantum-toolbar">
+                            <button type="button" class="quantum-btn" data-state="cold">❄️</button>
+                            <button type="button" class="quantum-btn" data-state="causal">🔄</button>
+                            <button type="button" class="quantum-btn" data-state="entangled">⚡️</button>
+                            <button type="button" class="quantum-btn" data-state="superposition">🌊</button>
+                        </div>
+
+                        <!-- Analysis Results -->
+                        <div id="analysisResults" class="row">
+                            <!-- Results will be dynamically populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        document.getElementById('analyze-btn').addEventListener('click', async () => {
-            const input = document.getElementById('analysis-input');
-            const container = document.getElementById('analysis-container');
-            
-            if (!input.value.trim()) {
-                alert('Please enter text to analyze');
-                return;
-            }
-            
+        // Wave animation
+        function updateWave() {
+            const paths = document.querySelectorAll('.wave-path');
+            paths.forEach(path => {
+                const width = 100;
+                const height = 30;
+                const points = [];
+                const amplitude = 10;
+                const frequency = 0.2;
+                const phase = Date.now() * 0.005;
+
+                for (let x = 0; x <= width; x++) {
+                    const y = height/2 + Math.sin((x * frequency) + phase) * amplitude;
+                    points.push(`${x},${y}`);
+                }
+
+                path.setAttribute('d', `M ${points.join(' L ')}`);
+            });
+            requestAnimationFrame(updateWave);
+        }
+
+        function createStateCard(state) {
+            return `
+                <div class="col-md-6 mb-3">
+                    <div class="analysis-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="state-emoji">${state.emoji}</span>
+                                <span class="state-name fw-bold">${state.temperature}</span>
+                            </div>
+                            <div class="mini-gauge">
+                                <svg viewBox="0 0 60 30">
+                                    <path d="M 5 25 A 25 25 0 0 1 55 25" fill="none" stroke="var(--bs-gray-600)" stroke-width="4"/>
+                                    <path class="gauge-path" d="M 5 25 A 25 25 0 0 1 55 25" fill="none" stroke="var(--bs-primary)" stroke-width="4" style="stroke-dasharray: ${state.confidence * 50} 50"/>
+                                </svg>
+                                <div class="gauge-value">${Math.round(state.confidence * 100)}%</div>
+                            </div>
+                        </div>
+                        <div class="wave-container mb-3">
+                            <svg class="confidence-wave" viewBox="0 0 100 30" preserveAspectRatio="none">
+                                <path class="wave-path" fill="none" stroke="var(--bs-primary)" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="details-content small">
+                            <div class="mb-2">
+                                <div class="fw-bold mb-1">Statement</div>
+                                <div class="text-muted">${state.statement}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function createEntanglementCard(entanglement) {
+            return `
+                <div class="col-md-6 mb-3">
+                    <div class="analysis-card">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span>🔄</span>
+                            <div class="progress flex-grow-1" style="height: 8px;">
+                                <div class="progress-bar" style="width: ${(entanglement.strength / 5) * 100}%"></div>
+                            </div>
+                            <span class="small">${entanglement.strength}/5</span>
+                        </div>
+                        <div class="small">
+                            <div class="text-muted mb-1">${entanglement.source}</div>
+                            <div class="text-muted">→ ${entanglement.target}</div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        // Form submission
+        document.getElementById('analysisForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const spinner = analyzeBtn.querySelector('.spinner-border');
+            const submitText = analyzeBtn.querySelector('.submit-text');
+            const dashboard = document.getElementById('analysisDashboard');
+            const resultsContainer = document.getElementById('analysisResults');
+
+            // Show loading state
+            analyzeBtn.disabled = true;
+            spinner.classList.remove('d-none');
+            submitText.textContent = 'Analyzing...';
+
             try {
                 const response = await fetch('/api/process', {
                     method: 'POST',
@@ -70,46 +213,50 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        query: input.value
+                        query: document.getElementById('queryText').value
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (!response.ok) {
                     throw new Error(data.error || 'Analysis failed');
                 }
-                
-                // Display results
-                container.innerHTML = `
-                    <div class="mt-4">
-                        <h3>Analysis Results</h3>
-                        <div class="card">
-                            <div class="card-body">
-                                <h5>States</h5>
-                                <ul>
-                                    ${data.quantum_analysis.states.map(state => 
-                                        `<li class="quantum-state">${state}</li>`
-                                    ).join('')}
-                                </ul>
-                                <h5>Entanglements</h5>
-                                <ul>
-                                    ${data.quantum_analysis.entanglements.map(entanglement => 
-                                        `<li class="quantum-state">${entanglement}</li>`
-                                    ).join('')}
-                                </ul>
-                            </div>
+
+                // Clear previous results
+                resultsContainer.innerHTML = '';
+
+                // Add state cards
+                data.quantum_analysis.states.forEach(state => {
+                    resultsContainer.insertAdjacentHTML('beforeend', createStateCard(state));
+                });
+
+                // Add entanglement cards
+                data.quantum_analysis.entanglements.forEach(entanglement => {
+                    resultsContainer.insertAdjacentHTML('beforeend', createEntanglementCard(entanglement));
+                });
+
+                // Show dashboard and start wave animation
+                dashboard.classList.remove('d-none');
+                updateWave();
+
+            } catch (error) {
+                resultsContainer.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger">
+                            ${error.message}
                         </div>
                     </div>
                 `;
-            } catch (error) {
-                container.innerHTML = `
-                    <div class="alert alert-danger mt-3">
-                        ${error.message}
-                    </div>
-                `;
+            } finally {
+                analyzeBtn.disabled = false;
+                spinner.classList.add('d-none');
+                submitText.textContent = 'Analyze';
             }
         });
+
+        // Initialize wave animation for any existing waves
+        updateWave();
     </script>
 </body>
 </html>
