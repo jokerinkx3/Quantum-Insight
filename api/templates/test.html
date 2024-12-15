@@ -99,7 +99,7 @@
                 </div>
 
                 <!-- Analysis Dashboard -->
-                <div id="analysisDashboard" class="card d-none">
+                <div id="analysisDashboard" class="card">
                     <div class="card-body">
                         <!-- Quantum State Toolbar -->
                         <div class="quantum-toolbar">
@@ -110,8 +110,50 @@
                         </div>
 
                         <!-- Analysis Results -->
-                        <div id="analysisResults" class="row">
-                            <!-- Results will be dynamically populated here -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="analysis-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="state-emoji">❄️</span>
+                                            <span class="state-name fw-bold">COLD</span>
+                                        </div>
+                                        <div class="mini-gauge">
+                                            <svg viewBox="0 0 60 30">
+                                                <path d="M 5 25 A 25 25 0 0 1 55 25" fill="none" stroke="var(--bs-gray-600)" stroke-width="4"/>
+                                                <path class="gauge-path" d="M 5 25 A 25 25 0 0 1 55 25" fill="none" stroke="var(--bs-primary)" stroke-width="4"/>
+                                            </svg>
+                                            <div class="gauge-value">85%</div>
+                                        </div>
+                                    </div>
+                                    <div class="wave-container mb-3">
+                                        <svg class="confidence-wave" viewBox="0 0 100 30" preserveAspectRatio="none">
+                                            <path class="wave-path" fill="none" stroke="var(--bs-primary)" stroke-width="2"/>
+                                        </svg>
+                                    </div>
+                                    <div class="details-content small">
+                                        <div class="mb-2">
+                                            <div class="fw-bold mb-1">Description</div>
+                                            <div class="text-muted">High certainty state based on empirical evidence</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <div class="fw-bold mb-1">Evidence</div>
+                                            <ul class="text-muted mb-0 ps-3">
+                                                <li>Multiple peer-reviewed sources</li>
+                                                <li>Empirical data support</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="analysis-card">
+                                    <h6 class="mb-3">Entanglements</h6>
+                                    <div class="entanglement-list">
+                                        <!-- Entanglement items will be added here -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -122,74 +164,97 @@
     <script>
         // Wave animation
         function updateWave() {
-            const paths = document.querySelectorAll('.wave-path');
-            paths.forEach(path => {
-                const width = 100;
-                const height = 30;
-                const points = [];
-                const amplitude = 10;
-                const frequency = 0.2;
-                const phase = Date.now() * 0.005;
+            const path = document.querySelector('.wave-path');
+            const width = 100;
+            const height = 30;
+            const points = [];
+            const amplitude = 10;
+            const frequency = 0.2;
+            const phase = Date.now() * 0.005;
 
-                for (let x = 0; x <= width; x++) {
-                    const y = height/2 + Math.sin((x * frequency) + phase) * amplitude;
-                    points.push(`${x},${y}`);
-                }
+            for (let x = 0; x <= width; x++) {
+                const y = height/2 + Math.sin((x * frequency) + phase) * amplitude;
+                points.push(`${x},${y}`);
+            }
 
-                path.setAttribute('d', `M ${points.join(' L ')}`);
-            });
+            path.setAttribute('d', `M ${points.join(' L ')}`);
             requestAnimationFrame(updateWave);
         }
 
-        function createStateCard(state) {
-            return `
-                <div class="col-md-6 mb-3">
-                    <div class="analysis-card">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="state-emoji">${state.emoji}</span>
-                                <span class="state-name fw-bold">${state.temperature}</span>
-                            </div>
-                            <div class="mini-gauge">
-                                <svg viewBox="0 0 60 30">
-                                    <path d="M 5 25 A 25 25 0 0 1 55 25" fill="none" stroke="var(--bs-gray-600)" stroke-width="4"/>
-                                    <path class="gauge-path" d="M 5 25 A 25 25 0 0 1 55 25" fill="none" stroke="var(--bs-primary)" stroke-width="4" style="stroke-dasharray: ${state.confidence * 50} 50"/>
-                                </svg>
-                                <div class="gauge-value">${Math.round(state.confidence * 100)}%</div>
-                            </div>
-                        </div>
-                        <div class="wave-container mb-3">
-                            <svg class="confidence-wave" viewBox="0 0 100 30" preserveAspectRatio="none">
-                                <path class="wave-path" fill="none" stroke="var(--bs-primary)" stroke-width="2"/>
-                            </svg>
-                        </div>
-                        <div class="details-content small">
-                            <div class="mb-2">
-                                <div class="fw-bold mb-1">Statement</div>
-                                <div class="text-muted">${state.statement}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
+        // Initialize wave animation
+        updateWave();
+
+        // Quantum toolbar interaction
+        document.querySelectorAll('.quantum-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.quantum-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const state = btn.dataset.state;
+                const details = getStateDetails(state);
+                updateAnalysisCard(details);
+            });
+        });
+
+        function getStateDetails(state) {
+            const states = {
+                cold: {
+                    emoji: '❄️',
+                    name: 'COLD',
+                    confidence: 85,
+                    description: 'High certainty state based on empirical evidence',
+                    evidence: ['Multiple peer-reviewed sources', 'Empirical data support']
+                },
+                causal: {
+                    emoji: '🔄',
+                    name: 'CAUSAL',
+                    confidence: 75,
+                    description: 'Strong causal relationship identified',
+                    evidence: ['Direct correlation observed', 'Temporal sequence verified']
+                },
+                entangled: {
+                    emoji: '⚡️',
+                    name: 'ENTANGLED',
+                    confidence: 95,
+                    description: 'Quantum entanglement detected',
+                    evidence: ['Strong correlation', 'Bidirectional influence']
+                },
+                superposition: {
+                    emoji: '🌊',
+                    name: 'SUPERPOSITION',
+                    confidence: 50,
+                    description: 'Multiple concurrent states detected',
+                    evidence: ['State uncertainty', 'Multiple possibilities']
+                }
+            };
+            return states[state];
         }
 
-        function createEntanglementCard(entanglement) {
-            return `
-                <div class="col-md-6 mb-3">
-                    <div class="analysis-card">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <span>🔄</span>
-                            <div class="progress flex-grow-1" style="height: 8px;">
-                                <div class="progress-bar" style="width: ${(entanglement.strength / 5) * 100}%"></div>
-                            </div>
-                            <span class="small">${entanglement.strength}/5</span>
-                        </div>
-                        <div class="small">
-                            <div class="text-muted mb-1">${entanglement.source}</div>
-                            <div class="text-muted">→ ${entanglement.target}</div>
-                        </div>
-                    </div>
-                </div>`;
+        function updateAnalysisCard(details) {
+            const card = document.querySelector('.analysis-card');
+            card.querySelector('.state-emoji').textContent = details.emoji;
+            card.querySelector('.state-name').textContent = details.name;
+            card.querySelector('.gauge-value').textContent = `${details.confidence}%`;
+
+            // Update gauge
+            const gaugePath = card.querySelector('.gauge-path');
+            const gaugeLength = gaugePath.getTotalLength();
+            const gaugeProgress = (details.confidence / 100) * gaugeLength;
+            gaugePath.style.strokeDasharray = `${gaugeProgress} ${gaugeLength}`;
+
+            // Update content
+            const content = card.querySelector('.details-content');
+            content.innerHTML = `
+                <div class="mb-2">
+                    <div class="fw-bold mb-1">Description</div>
+                    <div class="text-muted">${details.description}</div>
+                </div>
+                <div class="mb-2">
+                    <div class="fw-bold mb-1">Evidence</div>
+                    <ul class="text-muted mb-0 ps-3">
+                        ${details.evidence.map(e => `<li>${e}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
         }
 
         // Form submission
@@ -199,7 +264,6 @@
             const spinner = analyzeBtn.querySelector('.spinner-border');
             const submitText = analyzeBtn.querySelector('.submit-text');
             const dashboard = document.getElementById('analysisDashboard');
-            const resultsContainer = document.getElementById('analysisResults');
 
             // Show loading state
             analyzeBtn.disabled = true;
@@ -217,35 +281,22 @@
                     })
                 });
 
-                const data = await response.json();
-
                 if (!response.ok) {
-                    throw new Error(data.error || 'Analysis failed');
+                    throw new Error('Analysis failed');
                 }
 
-                // Clear previous results
-                resultsContainer.innerHTML = '';
-
-                // Add state cards
-                data.quantum_analysis.states.forEach(state => {
-                    resultsContainer.insertAdjacentHTML('beforeend', createStateCard(state));
-                });
-
-                // Add entanglement cards
-                data.quantum_analysis.entanglements.forEach(entanglement => {
-                    resultsContainer.insertAdjacentHTML('beforeend', createEntanglementCard(entanglement));
-                });
-
-                // Show dashboard and start wave animation
-                dashboard.classList.remove('d-none');
-                updateWave();
-
+                const data = await response.json();
+                
+                // Update the dashboard with the analysis results
+                dashboard.style.display = 'block';
+                
+                // TODO: Update the quantum states and entanglements based on the API response
+                
             } catch (error) {
-                resultsContainer.innerHTML = `
-                    <div class="col-12">
-                        <div class="alert alert-danger">
-                            ${error.message}
-                        </div>
+                console.error('Error:', error);
+                dashboard.innerHTML = `
+                    <div class="alert alert-danger">
+                        ${error.message}
                     </div>
                 `;
             } finally {
@@ -254,9 +305,6 @@
                 submitText.textContent = 'Analyze';
             }
         });
-
-        // Initialize wave animation for any existing waves
-        updateWave();
     </script>
 </body>
 </html>
