@@ -282,7 +282,8 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Analysis failed');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Analysis failed');
                 }
 
                 const data = await response.json();
@@ -290,11 +291,66 @@
                 // Update the dashboard with the analysis results
                 dashboard.style.display = 'block';
                 
-                // TODO: Update the quantum states and entanglements based on the API response
+                // Process quantum states
+                const states = data.quantum_analysis.states;
+                if (states && states.length > 0) {
+                    // Find the most certain state to display
+                    const stateOrder = {
+                        'ABSOLUTE': 0,
+                        'COLD': 1,
+                        'COOL': 2,
+                        'TEPID': 3,
+                        'WARM': 4,
+                        'HOT': 5,
+                        'PLASMA': 6
+                    };
+                    
+                    const primaryState = states.sort((a, b) => 
+                        stateOrder[a.temperature] - stateOrder[b.temperature]
+                    )[0];
+
+                    // Update the state card
+                    const stateCard = document.querySelector('.analysis-card');
+                    const confidenceLevel = getConfidenceLevel(primaryState.temperature);
+                    
+                    stateCard.querySelector('.state-emoji').textContent = primaryState.emoji;
+                    stateCard.querySelector('.state-name').textContent = primaryState.temperature;
+                    stateCard.querySelector('.gauge-value').textContent = `${Math.round(confidenceLevel * 100)}%`;
+
+                    // Update gauge
+                    const gaugePath = stateCard.querySelector('.gauge-path');
+                    const gaugeLength = gaugePath.getTotalLength();
+                    const gaugeProgress = confidenceLevel * gaugeLength;
+                    gaugePath.style.strokeDasharray = `${gaugeProgress} ${gaugeLength}`;
+
+                    // Update content
+                    stateCard.querySelector('.details-content').innerHTML = `
+                        <div class="mb-2">
+                            <div class="fw-bold mb-1">Statement</div>
+                            <div class="text-muted">${primaryState.statement}</div>
+                        </div>
+                    `;
+                }
+
+                // Process entanglements
+                const entanglements = data.quantum_analysis.entanglements;
+                if (entanglements && entanglements.length > 0) {
+                    const entanglementList = document.querySelector('.entanglement-list');
+                    entanglementList.innerHTML = entanglements.map(e => `
+                        <div class="mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary">🔄 ${e.strength}/5</span>
+                            </div>
+                            <div class="small text-muted mt-1">
+                                ${e.source} → ${e.target}
+                            </div>
+                        </div>
+                    `).join('');
+                }
                 
             } catch (error) {
                 console.error('Error:', error);
-                dashboard.innerHTML = `
+                dashboard.querySelector('.card-body').innerHTML = `
                     <div class="alert alert-danger">
                         ${error.message}
                     </div>
@@ -305,6 +361,20 @@
                 submitText.textContent = 'Analyze';
             }
         });
+
+        // Helper function to convert temperature to confidence level
+        function getConfidenceLevel(temperature) {
+            const confidenceLevels = {
+                'ABSOLUTE': 1.0,
+                'COLD': 0.85,
+                'COOL': 0.7,
+                'TEPID': 0.5,
+                'WARM': 0.4,
+                'HOT': 0.3,
+                'PLASMA': 0.1
+            };
+            return confidenceLevels[temperature] || 0.5;
+        }
     </script>
 </body>
 </html>
