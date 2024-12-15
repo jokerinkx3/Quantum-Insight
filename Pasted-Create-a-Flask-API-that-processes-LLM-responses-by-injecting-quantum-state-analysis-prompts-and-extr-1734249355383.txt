@@ -1,0 +1,151 @@
+Create a Flask API that processes LLM responses by injecting quantum state analysis prompts and extracting the resulting data. The API should:
+
+Accept original queries and append our quantum state prompt
+Process responses to extract quantum states and entanglements
+Provide endpoints for frontend interaction
+Include error handling and validation
+Use this code structure: // App.js - Modified version with API integration
+function App() {
+  const [inputText, setInputText] = React.useState('');
+  const [showAnalysis, setShowAnalysis] = React.useState(false);
+  const [selectedState, setSelectedState] = React.useState(null);
+  const [wavePhase, setWavePhase] = React.useState(0);
+  const [quantumStates, setQuantumStates] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const API_BASE_URL = 'your-replit-url';
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setWavePhase(prev => (prev + 0.1) % (2 * Math.PI));
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
+
+  const processQuantumAnalysis = async () => {
+    setIsLoading(true);
+    try {
+      // First, get the quantum prompt
+      const promptResponse = await fetch(`${API_BASE_URL}/api/prompt`);
+      const { prompt } = await promptResponse.json();
+
+      // Combine user input with quantum prompt
+      const augmentedQuery = `${inputText}\n\n${prompt}`;
+
+      // Process the response
+      const response = await fetch(`${API_BASE_URL}/api/process`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: inputText,
+          response: augmentedQuery
+        })
+      });
+
+      const data = await response.json();
+      
+      // Transform API response to match frontend format
+      const transformedStates = data.quantum_analysis.states.map(state => ({
+        emoji: state.emoji,
+        type: state.temperature,
+        confidence: getConfidenceLevel(state.temperature),
+        description: state.statement,
+        details: {
+          evidence: [state.statement],
+          implications: data.quantum_analysis.entanglements
+            .filter(e => e.source === state.statement)
+            .map(e => `${e.type} (${e.strength}/5) → ${e.target}`),
+          context: "Based on quantum analysis"
+        }
+      }));
+
+      setQuantumStates(transformedStates);
+      setShowAnalysis(true);
+    } catch (error) {
+      console.error('Error processing quantum analysis:', error);
+      // Add error handling UI feedback here
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Helper function to convert temperature states to confidence levels
+  const getConfidenceLevel = (temperature) => {
+    const confidenceLevels = {
+      'ABSOLUTE': 1.0,
+      'COLD': 0.85,
+      'COOL': 0.7,
+      'TEPID': 0.5,
+      'WARM': 0.4,
+      'HOT': 0.3,
+      'PLASMA': 0.1
+    };
+    return confidenceLevels[temperature] || 0.5;
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto p-4">
+      <div className="relative">
+        <textarea
+          className="w-full p-3 border rounded-lg resize-none"
+          rows="4"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder="Enter your text..."
+        />
+        <button
+          onClick={processQuantumAnalysis}
+          disabled={isLoading}
+          className={`absolute bottom-2 right-2 bg-gray-100 hover:bg-gray-200 rounded-full p-2 
+            ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          {isLoading ? '⌛' : '🔍'}
+        </button>
+      </div>
+
+      {/* Rest of your existing JSX remains the same */}
+    </div>
+  );
+}
+ For Frontend: # Additional endpoint to process LLM responses
+@app.route('/api/analyze', methods=['POST'])
+def analyze_text():
+    try:
+        data = request.get_json()
+        text = data.get('text')
+
+        if not text:
+            return jsonify({'error': 'Missing text'}), 400
+
+        # Here you would integrate with your chosen LLM
+        # For now, we'll simulate the response
+        llm_response = f"{text}\n\nQuantum State Analysis:\n" + \
+                      "💎 This is an absolute statement\n" + \
+                      "❄️ This is a cold statement\n" + \
+                      "Entanglements:\n" + \
+                      "🔄 (4/5) First statement → Second statement"
+
+        # Extract quantum states and entanglements
+        quantum_states = extractor.extract_states(llm_response)
+        entanglements = extractor.extract_entanglements(llm_response)
+
+        return jsonify({
+            'original_text': text,
+            'quantum_analysis': {
+                'states': quantum_states,
+                'entanglements': entanglements
+            }
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Add CORS headers
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
