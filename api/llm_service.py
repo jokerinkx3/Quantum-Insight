@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class LLMService:
     def __init__(self):
-        self.model = "gpt-4"  # Using GPT-4 model
+        self.model = "gpt-3.5-turbo"  # Using GPT-3.5 model for wider availability
         self._client = None
         
     @property
@@ -54,6 +54,12 @@ class LLMService:
                 "full_response": response_text
             }
             
+        except openai.RateLimitError as e:
+            logger.error(f"Rate limit exceeded: {str(e)}")
+            raise ValueError("API rate limit exceeded. Please try again in a few moments.")
+        except openai.APIError as e:
+            logger.error(f"OpenAI API error: {str(e)}")
+            raise ValueError("Error communicating with OpenAI. Please try again.")
         except Exception as e:
             logger.error(f"Error processing query through LLM: {str(e)}")
             raise RuntimeError(f"Failed to process query: {str(e)}")

@@ -1,0 +1,36 @@
+/1.1" 200 -
+DEBUG:api.routes:Received process request
+DEBUG:api.routes:Retrieved quantum prompt
+DEBUG:api.routes:Processing query through LLM
+DEBUG:openai._base_client:Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'json_data': {'messages': [{'role': 'system', 'content': 'You are a quantum state analyzer that analyzes text and provides detailed quantum state analysis.'}, {'role': 'user', 'content': 'when will humans inhabit mars?\n\n\nPlease analyze the above text and provide a quantum state analysis in the following format:\n\nQuantum State Analysis:\n💎 [Absolute statements - highest certainty]\n❄️ [Cold statements - very high certainty]\n🌊 [Cool statements - high certainty]\n🌡️ [Tepid statements - moderate certainty]\n☀️ [Warm statements - low certainty]\n🔥 [Hot statements - very low certainty]\n⚡ [Plasma statements - highly uncertain/speculative]\n\nEntanglements:\n🔄 (strength/5) [source statement] → [target statement]\n\nRules:\n1. Each statement should be preceded by the appropriate emoji\n2. Entanglements should show relationships between statements\n3. Rate entanglement strength from 1-5'}], 'model': 'gpt-4', 'max_tokens': 1000, 'temperature': 0.7}}
+DEBUG:openai._base_client:Sending HTTP Request: POST https://api.openai.com/v1/chat/completions
+DEBUG:httpcore.connection:connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=5.0 socket_options=None
+DEBUG:httpcore.connection:connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x7fcfedc375d0>
+DEBUG:httpcore.connection:start_tls.started ssl_context=<ssl.SSLContext object at 0x7fcfedc051c0> server_hostname='api.openai.com' timeout=5.0
+DEBUG:httpcore.connection:start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x7fcfedc37690>
+DEBUG:httpcore.http11:send_request_headers.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:send_request_headers.complete
+DEBUG:httpcore.http11:send_request_body.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:send_request_body.complete
+DEBUG:httpcore.http11:receive_response_headers.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:receive_response_headers.complete return_value=(b'HTTP/1.1', 404, b'Not Found', [(b'Date', b'Sun, 15 Dec 2024 08:16:27 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'vary', b'Origin'), (b'x-request-id', b'req_6a744dc86002a6451c8426d8b5f0f5ea'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'CF-Cache-Status', b'DYNAMIC'), (b'Set-Cookie', b'__cf_bm=Xw5jCrfOrw7twVkiSi_feQphgZIbTuNXlQuSPIFnVFo-1734250587-1.0.1.1-f_dxiCQxmH.iLQdfS7q3kO5t2gcEZAkhCxcyb6Voi1xHDp1IoiYJWdLjxRLD5xgnRqfqasnJH8Wsj_EcBgFOhg; path=/; expires=Sun, 15-Dec-24 08:46:27 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), (b'X-Content-Type-Options', b'nosniff'), (b'Set-Cookie', b'_cfuvid=2wkNncVEGbJKfonfzJNgv7wJhqAAJCaFVH_5xupbui0-1734250587051-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), (b'Server', b'cloudflare'), (b'CF-RAY', b'8f24fdd8dcad76b2-SEA'), (b'Content-Encoding', b'gzip'), (b'alt-svc', b'h3=":443"; ma=86400')])
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 404 Not Found"
+DEBUG:httpcore.http11:receive_response_body.started request=<Request [b'POST']>
+DEBUG:httpcore.http11:receive_response_body.complete
+DEBUG:httpcore.http11:response_closed.started
+DEBUG:httpcore.http11:response_closed.complete
+DEBUG:openai._base_client:HTTP Response: POST https://api.openai.com/v1/chat/completions "404 Not Found" Headers([('date', 'Sun, 15 Dec 2024 08:16:27 GMT'), ('content-type', 'application/json; charset=utf-8'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('vary', 'Origin'), ('x-request-id', 'req_6a744dc86002a6451c8426d8b5f0f5ea'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('cf-cache-status', 'DYNAMIC'), ('set-cookie', '__cf_bm=Xw5jCrfOrw7twVkiSi_feQphgZIbTuNXlQuSPIFnVFo-1734250587-1.0.1.1-f_dxiCQxmH.iLQdfS7q3kO5t2gcEZAkhCxcyb6Voi1xHDp1IoiYJWdLjxRLD5xgnRqfqasnJH8Wsj_EcBgFOhg; path=/; expires=Sun, 15-Dec-24 08:46:27 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), ('x-content-type-options', 'nosniff'), ('set-cookie', '_cfuvid=2wkNncVEGbJKfonfzJNgv7wJhqAAJCaFVH_5xupbui0-1734250587051-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), ('server', 'cloudflare'), ('cf-ray', '8f24fdd8dcad76b2-SEA'), ('content-encoding', 'gzip'), ('alt-svc', 'h3=":443"; ma=86400')])
+DEBUG:openai._base_client:request_id: req_6a744dc86002a6451c8426d8b5f0f5ea
+DEBUG:openai._base_client:Encountered httpx.HTTPStatusError
+Traceback (most recent call last):
+  File "/home/runner/New-Repl/.pythonlibs/lib/python3.11/site-packages/openai/_base_client.py", line 1040, in _request
+    response.raise_for_status()
+  File "/home/runner/New-Repl/.pythonlibs/lib/python3.11/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '404 Not Found' for url 'https://api.openai.com/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+DEBUG:openai._base_client:Not retrying
+DEBUG:openai._base_client:Re-raising status error
+ERROR:api.llm_service:Error processing query through LLM: Error code: 404 - {'error': {'message': 'The model `gpt-4` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
+ERROR:api.routes:LLM processing error: Failed to process query: Error code: 404 - {'error': {'message': 'The model `gpt-4` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
+INFO:werkzeug:172.31.196.28 - - [15/Dec/2024 08:16:27] "POST /api/process HTTP/1.1" 500 -
