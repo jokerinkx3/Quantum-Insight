@@ -10,7 +10,7 @@ def create_app():
     logger = logging.getLogger(__name__)
     
     # Initialize Flask app
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='templates')
     
     # Configure CORS
     CORS(app)

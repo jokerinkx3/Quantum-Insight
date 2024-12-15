@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+    <title>Quantum State Analysis Tester</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <style>
+        .result-card {
+            margin-top: 20px;
+        }
+        .quantum-state {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Quantum State Analysis Tester</h1>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form id="analysisForm">
+                            <div class="mb-3">
+                                <label for="queryText" class="form-label">Enter text to analyze:</label>
+                                <textarea class="form-control" id="queryText" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                Analyze
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card result-card d-none" id="resultsCard">
+                    <div class="card-body">
+                        <h5 class="card-title">Analysis Results</h5>
+                        <div id="quantumStates"></div>
+                        <div id="entanglements"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('analysisForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const resultsCard = document.getElementById('resultsCard');
+            const quantumStates = document.getElementById('quantumStates');
+            const entanglements = document.getElementById('entanglements');
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Analyzing...';
+            
+            try {
+                const response = await fetch('/api/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: document.getElementById('queryText').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultsCard.classList.remove('d-none');
+                    
+                    // Display quantum states
+                    quantumStates.innerHTML = '<h6>Quantum States:</h6>';
+                    data.quantum_analysis.states.forEach(state => {
+                        quantumStates.innerHTML += `
+                            <div class="quantum-state">
+                                ${state.emoji} ${state.statement} (Temperature: ${state.temperature})
+                            </div>
+                        `;
+                    });
+                    
+                    // Display entanglements
+                    entanglements.innerHTML = '<h6>Entanglements:</h6>';
+                    data.quantum_analysis.entanglements.forEach(entanglement => {
+                        entanglements.innerHTML += `
+                            <div class="quantum-state">
+                                🔄 (${entanglement.strength}/5) ${entanglement.source} → ${entanglement.target}
+                            </div>
+                        `;
+                    });
+                } else {
+                    throw new Error(data.error || 'Failed to process query');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Analyze';
+            }
+        });
+    </script>
+</body>
+</html>

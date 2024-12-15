@@ -1,5 +1,5 @@
 import logging
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from api.extractor import extractor
 from api.quantum_prompt import prompt_generator
 from api.schemas import validate_process_request
@@ -7,6 +7,11 @@ from api.llm_service import llm_service
 
 logger = logging.getLogger(__name__)
 api_bp = Blueprint('api', __name__)
+
+@api_bp.route('/test', methods=['GET'])
+def test_interface():
+    """Serve the test interface."""
+    return render_template('test.html')
 
 @api_bp.route('/prompt', methods=['GET'])
 def get_prompt():
