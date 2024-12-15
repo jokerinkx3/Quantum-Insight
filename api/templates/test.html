@@ -1,57 +1,151 @@
 <!DOCTYPE html>
 <html data-bs-theme="dark">
 <head>
-    <title>Quantum State Analysis Tester</title>
+    <title>Quantum State Analysis Dashboard</title>
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.css" rel="stylesheet">
     <style>
-        .result-card {
-            margin-top: 20px;
-        }
         .quantum-state {
-            margin: 10px 0;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .quantum-state:hover {
+            transform: translateX(5px);
+        }
+        .quantum-state.absolute { background: var(--bs-primary-bg-subtle); }
+        .quantum-state.cold { background: var(--bs-info-bg-subtle); }
+        .quantum-state.cool { background: var(--bs-success-bg-subtle); }
+        .quantum-state.tepid { background: var(--bs-warning-bg-subtle); }
+        .quantum-state.warm { background: var(--bs-danger-bg-subtle); }
+        .quantum-state.hot { background: var(--bs-danger-bg-subtle); }
+        .quantum-state.plasma { background: var(--bs-dark-bg-subtle); }
+        .entanglement {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-left: 3px solid var(--bs-primary);
+        }
+        .strength-indicator {
+            display: inline-block;
+            width: 80px;
+            height: 8px;
+            background: var(--bs-gray-700);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .strength-bar {
+            height: 100%;
+            background: var(--bs-primary);
+            transition: width 0.3s ease;
+        }
+        #error-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1>Quantum State Analysis Tester</h1>
+    <div class="container-fluid py-4">
         <div class="row">
-            <div class="col-md-12">
-                <div class="card">
+            <div class="col-lg-8 mx-auto">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3">Quantum State Analysis Dashboard</h1>
+                    <div class="text-muted">
+                        <small>Powered by OpenAI</small>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
                     <div class="card-body">
                         <form id="analysisForm">
                             <div class="mb-3">
                                 <label for="queryText" class="form-label">Enter text to analyze:</label>
-                                <textarea class="form-control" id="queryText" rows="4" required></textarea>
+                                <textarea 
+                                    class="form-control" 
+                                    id="queryText" 
+                                    rows="4" 
+                                    required 
+                                    placeholder="Type or paste your text here for quantum state analysis..."></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary" id="submitBtn">
-                                Analyze
-                            </button>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <span class="submit-text">Analyze</span>
+                                    <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
 
-                <div class="card result-card d-none" id="resultsCard">
+                <div class="card d-none" id="resultsCard">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Analysis Results</h5>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">Analysis Results</h5>
-                        <div id="quantumStates"></div>
-                        <div id="entanglements"></div>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <h6 class="mb-3">Quantum States</h6>
+                                <div id="quantumStates" class="mb-4"></div>
+                            </div>
+                            <div class="col-md-5">
+                                <h6 class="mb-3">Entanglements</h6>
+                                <div id="entanglements"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Error Toast -->
+    <div class="toast-container">
+        <div id="error-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Temperature to class mapping
+        const temperatureClasses = {
+            'ABSOLUTE': 'absolute',
+            'COLD': 'cold',
+            'COOL': 'cool',
+            'TEPID': 'tepid',
+            'WARM': 'warm',
+            'HOT': 'hot',
+            'PLASMA': 'plasma'
+        };
+
+        // Create error toast
+        function showError(message) {
+            const toastEl = document.getElementById('error-toast');
+            const toast = new bootstrap.Toast(toastEl);
+            toastEl.querySelector('.toast-body').textContent = message;
+            toast.show();
+        }
+
         document.getElementById('analysisForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
+            const spinner = submitBtn.querySelector('.spinner-border');
+            const submitText = submitBtn.querySelector('.submit-text');
             const resultsCard = document.getElementById('resultsCard');
             const quantumStates = document.getElementById('quantumStates');
             const entanglements = document.getElementById('entanglements');
             
+            // Show loading state
             submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Analyzing...';
+            spinner.classList.remove('d-none');
+            submitText.textContent = 'Analyzing...';
             
             try {
                 const response = await fetch('/api/process', {
@@ -70,21 +164,40 @@
                     resultsCard.classList.remove('d-none');
                     
                     // Display quantum states
-                    quantumStates.innerHTML = '<h6>Quantum States:</h6>';
+                    quantumStates.innerHTML = '';
                     data.quantum_analysis.states.forEach(state => {
+                        const temperatureClass = temperatureClasses[state.temperature] || 'tepid';
                         quantumStates.innerHTML += `
-                            <div class="quantum-state">
-                                ${state.emoji} ${state.statement} (Temperature: ${state.temperature})
+                            <div class="quantum-state ${temperatureClass}">
+                                <div class="d-flex align-items-center">
+                                    <span class="fs-4 me-2">${state.emoji}</span>
+                                    <div>
+                                        <div class="mb-1">${state.statement}</div>
+                                        <small class="text-muted">Temperature: ${state.temperature}</small>
+                                    </div>
+                                </div>
                             </div>
                         `;
                     });
                     
                     // Display entanglements
-                    entanglements.innerHTML = '<h6>Entanglements:</h6>';
+                    entanglements.innerHTML = '';
                     data.quantum_analysis.entanglements.forEach(entanglement => {
+                        const strengthPercentage = (entanglement.strength / 5) * 100;
                         entanglements.innerHTML += `
-                            <div class="quantum-state">
-                                🔄 (${entanglement.strength}/5) ${entanglement.source} → ${entanglement.target}
+                            <div class="entanglement">
+                                <div class="mb-2">
+                                    <small class="text-muted">Strength:</small>
+                                    <div class="strength-indicator">
+                                        <div class="strength-bar" style="width: ${strengthPercentage}%"></div>
+                                    </div>
+                                    <small class="ms-2">${entanglement.strength}/5</small>
+                                </div>
+                                <div class="small">
+                                    <div class="mb-1">${entanglement.source}</div>
+                                    <div class="text-muted">↓</div>
+                                    <div>${entanglement.target}</div>
+                                </div>
                             </div>
                         `;
                     });
@@ -92,10 +205,12 @@
                     throw new Error(data.error || 'Failed to process query');
                 }
             } catch (error) {
-                alert('Error: ' + error.message);
+                showError(error.message);
+                resultsCard.classList.add('d-none');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Analyze';
+                spinner.classList.add('d-none');
+                submitText.textContent = 'Analyze';
             }
         });
     </script>
