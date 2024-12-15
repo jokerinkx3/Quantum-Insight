@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class LLMService:
     def __init__(self):
-        self.model = "gpt-4"  # Can be configured based on requirements
+        self.model = "gpt-3.5-turbo"  # Using more widely available model
         self._client = None
         
     @property

@@ -1,0 +1,105 @@
+# Backend encryption handling
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+import base64
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import json
+
+class EncryptionHandler:
+    def __init__(self):
+        self.private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048
+        )
+        self.public_key = self.private_key.public_key()
+        self.client_public_keys = {}
+
+    def import_client_key(self, client_id, public_key_str):
+        public_key_bytes = base64.b64decode(public_key_str)
+        public_key = serialization.load_pem_public_key(public_key_bytes)
+        self.client_public_keys[client_id] = public_key
+
+    def decrypt_message(self, client_id, encrypted_data, encrypted_key, iv):
+        # Decrypt the symmetric key
+        symmetric_key = self.private_key.decrypt(
+            base64.b64decode(encrypted_key),
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+
+        # Decrypt the message
+        aesgcm = AESGCM(symmetric_key)
+        decrypted_data = aesgcm.decrypt(
+            base64.b64decode(iv),
+            base64.b64decode(encrypted_data),
+            None
+        )
+
+        return decrypted_data.decode()
+
+    def encrypt_message(self, client_id, message):
+        # Generate symmetric key
+        symmetric_key = AESGCM.generate_key(bit_length=256)
+        aesgcm = AESGCM(symmetric_key)
+
+        # Generate IV
+        iv = os.urandom(12)
+
+        # Encrypt message
+        encrypted_data = aesgcm.encrypt(iv, message.encode(), None)
+
+        # Encrypt symmetric key with client's public key
+        encrypted_key = self.client_public_keys[client_id].encrypt(
+            symmetric_key,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+
+        return {
+            'encryptedData': base64.b64encode(encrypted_data).decode(),
+            'encryptedKey': base64.b64encode(encrypted_key).decode(),
+            'iv': base64.b64encode(iv).decode()
+        }
+
+encryption_handler = EncryptionHandler()
+
+@app.route('/api/init-encryption', methods=['POST'])
+def initialize_encryption():
+    data = request.get_json()
+    client_id = request.headers.get('X-Client-ID')  # You'll need to implement client ID generation
+    encryption_handler.import_client_key(client_id, data['publicKey'])
+    return jsonify({'status': 'success'})
+
+@app.route('/api/process', methods=['POST'])
+def process_encrypted_query():
+    try:
+        data = request.get_json()
+        client_id = request.headers.get('X-Client-ID')
+
+        # Decrypt incoming message
+        decrypted_message = encryption_handler.decrypt_message(
+            client_id,
+            data['encryptedData'],
+            data['encryptedKey'],
+            data['iv']
+        )
+
+        # Process the decrypted message
+        # ... your existing processing logic ...
+
+        # Encrypt the response
+        response_data = json.dumps(result)
+        encrypted_response = encryption_handler.encrypt_message(client_id, response_data)
+
+        return jsonify(encrypted_response)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
