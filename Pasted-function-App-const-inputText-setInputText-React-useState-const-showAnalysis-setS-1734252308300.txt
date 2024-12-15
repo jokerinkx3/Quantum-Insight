@@ -1,0 +1,177 @@
+function App() {
+  const [inputText, setInputText] = React.useState('');
+  const [showAnalysis, setShowAnalysis] = React.useState(false);
+  const [selectedState, setSelectedState] = React.useState(null);
+  const [wavePhase, setWavePhase] = React.useState(0);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setWavePhase(prev => (prev + 0.1) % (2 * Math.PI));
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
+
+  const quantumStates = [
+    {
+      emoji: "❄️",
+      type: "COLD",
+      confidence: 0.85,
+      description: "High certainty state",
+      details: {
+        evidence: ["Multiple peer-reviewed sources", "Empirical data"],
+        implications: ["High reliability", "Strong foundation"],
+        context: "Based on established research"
+      }
+    },
+    {
+      emoji: "🔄",
+      type: "CAUSAL",
+      confidence: 0.75,
+      description: "Strong causal link",
+      details: {
+        relationship: "Direct influence observed",
+        strength: "Strong bidirectional",
+        factors: ["Temporal sequence", "Control variables"]
+      }
+    },
+    {
+      emoji: "⚡️",
+      type: "ENTANGLED",
+      confidence: 0.95,
+      description: "Quantum entanglement",
+      details: {
+        connection: "Strong correlation",
+        reliability: "Highly consistent",
+        impact: "Critical relationship"
+      }
+    },
+    {
+      emoji: "🌊",
+      type: "SUPERPOSITION",
+      confidence: 0.50,
+      description: "Multiple states",
+      details: {
+        states: ["Primary", "Secondary", "Tertiary"],
+        stability: "Variable",
+        observation: "Context dependent"
+      }
+    }
+  ];
+
+  const generateWavePoints = (amplitude) => {
+    const points = [];
+    const width = 100;
+    const height = 20;
+    for (let x = 0; x <= width; x += 2) {
+      const y = height/2 + Math.sin(x * 0.05 + wavePhase) * (height/2) * amplitude;
+      points.push(`${x},${y}`);
+    }
+    return points.join(' ');
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto p-4">
+      <div className="relative">
+        <textarea
+          className="w-full p-3 border rounded-lg resize-none"
+          rows="4"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder="Enter your text..."
+        />
+        <button
+          onClick={() => setShowAnalysis(!showAnalysis)}
+          className="absolute bottom-2 right-2 bg-gray-100 hover:bg-gray-200 rounded-full p-2"
+        >
+          🔍
+        </button>
+      </div>
+
+      {showAnalysis && (
+        <div className="mt-2">
+          <div className="bg-gray-50 rounded-lg p-2 shadow-sm">
+            <div className="flex flex-wrap gap-2 items-center">
+              <button 
+                className="text-lg bg-white p-1 rounded-full shadow-sm hover:shadow-md"
+                onClick={() => setShowAnalysis(false)}
+              >
+                ✕
+              </button>
+              {quantumStates.map((state, idx) => (
+                <button 
+                  key={idx}
+                  className={`text-xl bg-white p-2 rounded-full shadow-sm hover:shadow-md transition-all ${
+                    selectedState === idx ? 'ring-2 ring-blue-400' : ''
+                  }`}
+                  onClick={() => setSelectedState(selectedState === idx ? null : idx)}
+                >
+                  {state.emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {selectedState !== null && (
+            <div className="mt-2 bg-white rounded-lg p-3 shadow-sm border border-gray-100 animate-fadeIn">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl animate-bounce">
+                    {quantumStates[selectedState].emoji}
+                  </span>
+                  <span className="font-medium">
+                    {quantumStates[selectedState].type}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Compact gauge */}
+                  <div className="h-6 w-24 bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-blue-500 transition-all duration-500"
+                      style={{ width: `${quantumStates[selectedState].confidence * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-sm text-gray-600">
+                    {(quantumStates[selectedState].confidence * 100).toFixed()}%
+                  </span>
+
+                  {/* Compact wave */}
+                  <svg className="w-24 h-6">
+                    <polyline
+                      points={generateWavePoints(quantumStates[selectedState].confidence)}
+                      fill="none"
+                      stroke="#3b82f6"
+                      strokeWidth="1"
+                      transform="translate(0, 2)"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <p className="text-gray-600 text-sm mb-2">
+                {quantumStates[selectedState].description}
+              </p>
+
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {Object.entries(quantumStates[selectedState].details).map(([key, value]) => (
+                  <div key={key} className="bg-gray-50 p-2 rounded">
+                    <span className="font-medium text-gray-700 capitalize">{key}: </span>
+                    {Array.isArray(value) ? (
+                      <ul className="list-disc list-inside ml-2">
+                        {value.map((item, i) => (
+                          <li key={i} className="text-gray-600">{item}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className="text-gray-600">{value}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
