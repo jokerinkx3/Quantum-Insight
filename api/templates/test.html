@@ -569,9 +569,11 @@
                                 // Trigger fade animation on content
                                 if (content.classList.contains('expanded')) {
                                     content.querySelectorAll('.fade-in').forEach(el => {
-                                        el.style.opacity = 0;
-                                        void el.offsetWidth; // Trigger reflow
-                                        el.style.opacity = 1;
+                                        if (el) {
+                                            el.style.opacity = 0;
+                                            void el.offsetWidth; // Trigger reflow
+                                            el.style.opacity = 1;
+                                        }
                                     });
                                 }
                             });
@@ -580,26 +582,36 @@
 
                     // Update the state card
                     const stateCard = document.querySelector('.analysis-card');
+                    if (!stateCard) return;
+                    
                     const confidenceLevel = getConfidenceLevel(primaryState.temperature);
 
                     // Wrap card content in expandable container
                     const cardContent = stateCard.querySelector('.details-content');
-                    if (!cardContent.closest('.card-content')) {
+                    if (cardContent && !cardContent.closest('.card-content')) {
                         const contentWrapper = document.createElement('div');
                         contentWrapper.className = 'card-content fade-in';
-                        cardContent.parentNode.insertBefore(contentWrapper, cardContent);
-                        contentWrapper.appendChild(cardContent);
+                        if (cardContent.parentNode) {
+                            cardContent.parentNode.insertBefore(contentWrapper, cardContent);
+                            contentWrapper.appendChild(cardContent);
+                        }
                     }
 
-                    stateCard.querySelector('.state-emoji').textContent = primaryState.emoji;
-                    stateCard.querySelector('.state-name').textContent = primaryState.temperature;
-                    stateCard.querySelector('.gauge-value').textContent = `${Math.round(confidenceLevel * 100)}%`;
+                    const stateEmoji = stateCard.querySelector('.state-emoji');
+                    const stateName = stateCard.querySelector('.state-name');
+                    const gaugeValue = stateCard.querySelector('.gauge-value');
+                    const gaugePath = stateCard.querySelector('.gauge-path');
+
+                    if (stateEmoji) stateEmoji.textContent = primaryState.emoji;
+                    if (stateName) stateName.textContent = primaryState.temperature;
+                    if (gaugeValue) gaugeValue.textContent = `${Math.round(confidenceLevel * 100)}%`;
 
                     // Update gauge
-                    const gaugePath = stateCard.querySelector('.gauge-path');
-                    const gaugeLength = gaugePath.getTotalLength();
-                    const gaugeProgress = confidenceLevel * gaugeLength;
-                    gaugePath.style.strokeDasharray = `${gaugeProgress} ${gaugeLength}`;
+                    if (gaugePath) {
+                        const gaugeLength = gaugePath.getTotalLength();
+                        const gaugeProgress = confidenceLevel * gaugeLength;
+                        gaugePath.style.strokeDasharray = `${gaugeProgress} ${gaugeLength}`;
+                    }
 
                     // Update content
                     const stateCharacteristics = {
