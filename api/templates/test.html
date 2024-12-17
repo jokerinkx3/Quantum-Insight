@@ -99,7 +99,7 @@
                 </div>
 
                 <!-- Analysis Dashboard -->
-                <div id="analysisDashboard" class="card">
+                <div id="analysisDashboard" class="card" style="display: none;">
                     <div class="card-body">
                         <!-- Quantum State Toolbar -->
                         <div class="quantum-toolbar">
@@ -287,9 +287,6 @@
                 }
 
                 const data = await response.json();
-                
-                // Update the dashboard with the analysis results
-                dashboard.style.display = 'block';
                 
                 // Process quantum states
                 const states = data.quantum_analysis.states;
