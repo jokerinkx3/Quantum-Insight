@@ -116,9 +116,11 @@ function App() {
             </div>
           </div>
 
-          {/* Detailed Information Cards */}
+          {/* Visualization Dashboard */}
           {selectedState !== null && (
             <div className="grid gap-4">
+              
+
               {/* Main State Card */}
               <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-3">
@@ -165,18 +167,7 @@ function App() {
                 </div>
               </div>
 
-              {/* Wave Visualization Card */}
-              <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-                <svg className="w-full h-12">
-                  <polyline
-                    points={generateWavePoints(quantumStates[selectedState].confidence)}
-                    fill="none"
-                    stroke="#3b82f6"
-                    strokeWidth="2"
-                    transform="translate(0, 12)"
-                  />
-                </svg>
-              </div>
+              
             </div>
           )}
         </div>
