@@ -288,7 +288,8 @@
 
                 const data = await response.json();
                 
-                // Process quantum states
+                // Show dashboard and process quantum states
+                dashboard.style.display = 'block';
                 const states = data.quantum_analysis.states;
                 if (states && states.length > 0) {
                     // Find the most certain state to display
