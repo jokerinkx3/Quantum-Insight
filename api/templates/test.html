@@ -201,7 +201,9 @@
     <script>
         // Wave animation
         function updateWave() {
-            const path = document.querySelector('.wave-path');
+            const paths = document.querySelectorAll('.wave-path');
+            if (!paths.length) return;
+            
             const width = 100;
             const height = 30;
             const points = [];
@@ -214,12 +216,16 @@
                 points.push(`${x},${y}`);
             }
 
-            path.setAttribute('d', `M ${points.join(' L ')}`);
+            paths.forEach(path => {
+                path.setAttribute('d', `M ${points.join(' L ')}`);
+            });
             requestAnimationFrame(updateWave);
         }
 
-        // Initialize wave animation
-        updateWave();
+        // Initialize wave animation after DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            updateWave();
+        });
 
         // Quantum toolbar interaction
         document.addEventListener('DOMContentLoaded', function() {
