@@ -71,12 +71,50 @@ function App() {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
+      {/* Visualization Dashboard - Top */}
+      <div className="mb-8">
+        <div className="mb-4 bg-gray-50 rounded-lg p-3 shadow-sm">
+          <div className="flex flex-wrap gap-3 items-center">
+            {quantumStates.map((state, idx) => (
+              <button 
+                key={idx}
+                className={`text-xl bg-white p-2 rounded-full shadow-sm hover:shadow-md transition-all ${
+                  selectedState === idx ? 'ring-2 ring-blue-400' : ''
+                }`}
+                onClick={() => setSelectedState(selectedState === idx ? null : idx)}
+              >
+                {state.emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+
+      {/* Input Section - Middle */}
+      <div className="mb-8">
+        <div className="relative">
+          <textarea
+            className="w-full p-3 border rounded-lg resize-none"
+            rows="4"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="Enter your text..."
+          />
+          <button
+            onClick={() => setShowAnalysis(!showAnalysis)}
+            className="absolute bottom-2 right-2 bg-gray-100 hover:bg-gray-200 rounded-full p-2"
+          >
+            🔍
+          </button>
+        </div>
+      </div>
+
+      {/* Detailed Analysis Results - Bottom */}
       {showAnalysis && (
         <div>
-          {/* Details Section */}
           {selectedState !== null && (
             <div className="grid gap-4">
-              {/* Details Card */}
               <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
                 <p className="text-gray-600 mb-4">
                   {quantumStates[selectedState].description}
@@ -100,48 +138,14 @@ function App() {
               </div>
             </div>
           )}
-          {/* Toolbar and Icons */}
-          <div className="mb-4 bg-gray-50 rounded-lg p-3 shadow-sm">
-            <div className="flex flex-wrap gap-3 items-center">
-              <button 
-                className="text-lg bg-white p-1 rounded-full shadow-sm hover:shadow-md"
-                onClick={() => setShowAnalysis(false)}
-              >
-                ✕
-              </button>
-              {quantumStates.map((state, idx) => (
-                <button 
-                  key={idx}
-                  className={`text-xl bg-white p-2 rounded-full shadow-sm hover:shadow-md transition-all ${
-                    selectedState === idx ? 'ring-2 ring-blue-400' : ''
-                  }`}
-                  onClick={() => setSelectedState(selectedState === idx ? null : idx)}
-                >
-                  {state.emoji}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Input Section */}
-      <div className="mb-4">
-        <div className="relative">
-          <textarea
-            className="w-full p-3 border rounded-lg resize-none"
-            rows="4"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder="Enter your text..."
-          />
-          <button
-            onClick={() => setShowAnalysis(!showAnalysis)}
-            className="absolute bottom-2 right-2 bg-gray-100 hover:bg-gray-200 rounded-full p-2"
+          <button 
+            className="text-lg bg-white p-1 rounded-full shadow-sm hover:shadow-md"
+            onClick={() => setShowAnalysis(false)}
           >
-            🔍
+            ✕
           </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
