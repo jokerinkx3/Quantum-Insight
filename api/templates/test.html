@@ -150,24 +150,44 @@
                                     </div>
                                     <div class="details-content small">
                                         <div class="mb-2">
-                                            <div class="fw-bold mb-1">Description</div>
-                                            <div class="text-muted">High certainty state based on empirical evidence</div>
+                                            <div class="fw-bold mb-1">Statement</div>
+                                            <div class="text-muted statement-text"></div>
                                         </div>
                                         <div class="mb-2">
-                                            <div class="fw-bold mb-1">Evidence</div>
-                                            <ul class="text-muted mb-0 ps-3">
-                                                <li>Multiple peer-reviewed sources</li>
-                                                <li>Empirical data support</li>
-                                            </ul>
+                                            <div class="fw-bold mb-1">Confidence Level</div>
+                                            <div class="confidence-bars">
+                                                <div class="progress mb-2" style="height: 8px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: 85%;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <div class="fw-bold mb-1">State Characteristics</div>
+                                            <div class="state-characteristics"></div>
                                         </div>
                                     </div>
                                 </div>
+                                
+                                <!-- All States Summary -->
+                                <div class="analysis-card mt-3">
+                                    <h6 class="mb-3">Quantum States Distribution</h6>
+                                    <div id="statesDistribution" class="states-distribution"></div>
+                                </div>
                             </div>
                             <div class="col-md-6">
+                                <!-- Entanglements Card -->
                                 <div class="analysis-card">
-                                    <h6 class="mb-3">Entanglements</h6>
+                                    <h6 class="mb-3">Quantum Entanglements</h6>
                                     <div class="entanglement-list">
                                         <!-- Entanglement items will be added here -->
+                                    </div>
+                                </div>
+                                
+                                <!-- State Transition Card -->
+                                <div class="analysis-card mt-3">
+                                    <h6 class="mb-3">State Transitions</h6>
+                                    <div class="state-transitions">
+                                        <div class="transition-path"></div>
                                     </div>
                                 </div>
                             </div>
@@ -390,12 +410,45 @@
                     gaugePath.style.strokeDasharray = `${gaugeProgress} ${gaugeLength}`;
 
                     // Update content
-                    stateCard.querySelector('.details-content').innerHTML = `
-                        <div class="mb-2">
-                            <div class="fw-bold mb-1">Statement</div>
-                            <div class="text-muted">${primaryState.statement}</div>
+                    const stateCharacteristics = {
+                        'ABSOLUTE': 'Highest certainty, based on fundamental truths or mathematical proofs',
+                        'COLD': 'Very high certainty, supported by extensive empirical evidence',
+                        'COOL': 'High certainty, well-documented with reliable sources',
+                        'TEPID': 'Moderate certainty, some supporting evidence with caveats',
+                        'WARM': 'Low certainty, limited evidence or conflicting data',
+                        'HOT': 'Very low certainty, mostly speculation or hypothesis',
+                        'PLASMA': 'Highly uncertain, purely theoretical or speculative'
+                    };
+
+                    stateCard.querySelector('.statement-text').textContent = primaryState.statement;
+                    stateCard.querySelector('.state-characteristics').textContent = 
+                        stateCharacteristics[primaryState.temperature] || '';
+                    
+                    // Update states distribution
+                    const statesDistribution = document.getElementById('statesDistribution');
+                    statesDistribution.innerHTML = states.map(state => `
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="me-2">${state.emoji}</span>
+                            <div class="flex-grow-1">
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-${getStateColor(state.temperature)}" 
+                                         role="progressbar" 
+                                         style="width: ${getStatePercentage(state.temperature)}%">
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="ms-2 small">${state.temperature}</span>
                         </div>
-                    `;
+                    `).join('');
+                    
+                    // Update state transitions
+                    const transitionPath = document.querySelector('.transition-path');
+                    transitionPath.innerHTML = states.map((state, index) => `
+                        <div class="d-flex align-items-center ${index < states.length - 1 ? 'mb-2' : ''}">
+                            <span class="me-2">${state.emoji}</span>
+                            ${index < states.length - 1 ? '<div class="transition-arrow">↓</div>' : ''}
+                        </div>
+                    `).join('');
                 }
 
                 // Process entanglements
@@ -457,6 +510,32 @@
                     }
                 });
             }
+        }
+    // Helper functions for state visualization
+        function getStateColor(temperature) {
+            const colors = {
+                'ABSOLUTE': 'primary',
+                'COLD': 'info',
+                'COOL': 'success',
+                'TEPID': 'warning',
+                'WARM': 'danger',
+                'HOT': 'danger',
+                'PLASMA': 'secondary'
+            };
+            return colors[temperature] || 'primary';
+        }
+
+        function getStatePercentage(temperature) {
+            const percentages = {
+                'ABSOLUTE': 100,
+                'COLD': 85,
+                'COOL': 70,
+                'TEPID': 50,
+                'WARM': 35,
+                'HOT': 20,
+                'PLASMA': 10
+            };
+            return percentages[temperature] || 50;
         }
     </script>
 </body>
