@@ -561,19 +561,21 @@
                         const content = card.querySelector('.card-content');
                         const toggle = card.querySelector('.card-toggle');
                         
-                        header.addEventListener('click', () => {
-                            content.classList.toggle('expanded');
-                            toggle.classList.toggle('expanded');
-                            
-                            // Trigger fade animation on content
-                            if (content.classList.contains('expanded')) {
-                                content.querySelectorAll('.fade-in').forEach(el => {
-                                    el.style.opacity = 0;
-                                    void el.offsetWidth; // Trigger reflow
-                                    el.style.opacity = 1;
-                                });
-                            }
-                        });
+                        if (header && content && toggle) {
+                            header.addEventListener('click', () => {
+                                content.classList.toggle('expanded');
+                                toggle.classList.toggle('expanded');
+                                
+                                // Trigger fade animation on content
+                                if (content.classList.contains('expanded')) {
+                                    content.querySelectorAll('.fade-in').forEach(el => {
+                                        el.style.opacity = 0;
+                                        void el.offsetWidth; // Trigger reflow
+                                        el.style.opacity = 1;
+                                    });
+                                }
+                            });
+                        }
                     });
 
                     // Update the state card
