@@ -297,7 +297,10 @@
         // Wave animation
         function updateWave() {
             const paths = document.querySelectorAll('.wave-path');
-            if (!paths.length) return;
+            if (!paths.length) {
+                requestAnimationFrame(updateWave);
+                return;
+            }
             
             const width = 100;
             const height = 30;
@@ -313,8 +316,12 @@
 
             const pathData = `M ${points.join(' L ')}`;
             paths.forEach(path => {
-                if (path) {
-                    path.setAttribute('d', pathData);
+                try {
+                    if (path && path.setAttribute) {
+                        path.setAttribute('d', pathData);
+                    }
+                } catch (e) {
+                    console.warn('Error updating wave path:', e);
                 }
             });
             requestAnimationFrame(updateWave);
@@ -628,8 +635,10 @@
                     stateCard.querySelector('.state-characteristics').textContent =
                         stateCharacteristics[primaryState.temperature] || '';
 
-                    // Start wave animation
-                    startWaveAnimation();
+                    // Start wave animation after a short delay to ensure DOM is ready
+                    setTimeout(() => {
+                        startWaveAnimation();
+                    }, 100);
 
                     // Update states distribution
                     const statesDistribution = document.getElementById('statesDistribution');
