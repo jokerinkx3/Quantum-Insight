@@ -1,3 +1,4 @@
+
 function App() {
   const [inputText, setInputText] = React.useState('');
   const [showAnalysis, setShowAnalysis] = React.useState(false);
@@ -70,27 +71,31 @@ function App() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <div className="relative">
-        <textarea
-          className="w-full p-3 border rounded-lg resize-none"
-          rows="4"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder="Enter your text..."
-        />
-        <button
-          onClick={() => setShowAnalysis(!showAnalysis)}
-          className="absolute bottom-2 right-2 bg-gray-100 hover:bg-gray-200 rounded-full p-2"
-        >
-          🔍
-        </button>
+    <div className="max-w-4xl mx-auto p-4">
+      {/* Input Section */}
+      <div className="mb-4">
+        <div className="relative">
+          <textarea
+            className="w-full p-3 border rounded-lg resize-none"
+            rows="4"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="Enter your text..."
+          />
+          <button
+            onClick={() => setShowAnalysis(!showAnalysis)}
+            className="absolute bottom-2 right-2 bg-gray-100 hover:bg-gray-200 rounded-full p-2"
+          >
+            🔍
+          </button>
+        </div>
       </div>
 
       {showAnalysis && (
-        <div className="mt-2">
-          <div className="bg-gray-50 rounded-lg p-2 shadow-sm">
-            <div className="flex flex-wrap gap-2 items-center">
+        <div>
+          {/* Toolbar and Icons */}
+          <div className="mb-4 bg-gray-50 rounded-lg p-3 shadow-sm">
+            <div className="flex flex-wrap gap-3 items-center">
               <button 
                 className="text-lg bg-white p-1 rounded-full shadow-sm hover:shadow-md"
                 onClick={() => setShowAnalysis(false)}
@@ -111,62 +116,66 @@ function App() {
             </div>
           </div>
 
+          {/* Detailed Information Cards */}
           {selectedState !== null && (
-            <div className="mt-2 bg-white rounded-lg p-3 shadow-sm border border-gray-100 animate-fadeIn">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl animate-bounce">
-                    {quantumStates[selectedState].emoji}
-                  </span>
-                  <span className="font-medium">
-                    {quantumStates[selectedState].type}
-                  </span>
+            <div className="grid gap-4">
+              {/* Main State Card */}
+              <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl animate-bounce">
+                      {quantumStates[selectedState].emoji}
+                    </span>
+                    <h3 className="text-lg font-medium">
+                      {quantumStates[selectedState].type}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-6 w-24 bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-blue-500 transition-all duration-500"
+                        style={{ width: `${quantumStates[selectedState].confidence * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-gray-600">
+                      {(quantumStates[selectedState].confidence * 100).toFixed()}%
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  {/* Compact gauge */}
-                  <div className="h-6 w-24 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-blue-500 transition-all duration-500"
-                      style={{ width: `${quantumStates[selectedState].confidence * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-sm text-gray-600">
-                    {(quantumStates[selectedState].confidence * 100).toFixed()}%
-                  </span>
+                <p className="text-gray-600 mb-4">
+                  {quantumStates[selectedState].description}
+                </p>
 
-                  {/* Compact wave */}
-                  <svg className="w-24 h-6">
-                    <polyline
-                      points={generateWavePoints(quantumStates[selectedState].confidence)}
-                      fill="none"
-                      stroke="#3b82f6"
-                      strokeWidth="1"
-                      transform="translate(0, 2)"
-                    />
-                  </svg>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(quantumStates[selectedState].details).map(([key, value]) => (
+                    <div key={key} className="bg-gray-50 p-3 rounded-lg">
+                      <h4 className="font-medium text-gray-700 capitalize mb-2">{key}</h4>
+                      {Array.isArray(value) ? (
+                        <ul className="list-disc list-inside space-y-1">
+                          {value.map((item, i) => (
+                            <li key={i} className="text-gray-600">{item}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-gray-600">{value}</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <p className="text-gray-600 text-sm mb-2">
-                {quantumStates[selectedState].description}
-              </p>
-
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                {Object.entries(quantumStates[selectedState].details).map(([key, value]) => (
-                  <div key={key} className="bg-gray-50 p-2 rounded">
-                    <span className="font-medium text-gray-700 capitalize">{key}: </span>
-                    {Array.isArray(value) ? (
-                      <ul className="list-disc list-inside ml-2">
-                        {value.map((item, i) => (
-                          <li key={i} className="text-gray-600">{item}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <span className="text-gray-600">{value}</span>
-                    )}
-                  </div>
-                ))}
+              {/* Wave Visualization Card */}
+              <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                <svg className="w-full h-12">
+                  <polyline
+                    points={generateWavePoints(quantumStates[selectedState].confidence)}
+                    fill="none"
+                    stroke="#3b82f6"
+                    strokeWidth="2"
+                    transform="translate(0, 12)"
+                  />
+                </svg>
               </div>
             </div>
           )}
