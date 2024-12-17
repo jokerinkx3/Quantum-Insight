@@ -204,8 +204,6 @@
         // Quantum toolbar interaction
         document.querySelectorAll('.quantum-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.quantum-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
                 const state = btn.dataset.state;
                 const details = getStateDetails(state);
                 updateAnalysisCard(details);
@@ -357,6 +355,9 @@
                 
                 // Show dashboard and process quantum states
                 dashboard.style.display = 'block';
+                
+                // Update button states based on analysis
+                updateQuantumButtons(data.quantum_analysis.states);
                 const states = data.quantum_analysis.states;
                 if (states && states.length > 0) {
                     // Find the most certain state to display
@@ -443,3 +444,22 @@
     </script>
 </body>
 </html>
+
+
+
+        function updateQuantumButtons(states) {
+            // Reset all buttons
+            document.querySelectorAll('.quantum-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Map each state to its button and activate
+            if (states && states.length > 0) {
+                states.forEach(state => {
+                    const btn = document.querySelector(`.quantum-btn[data-state="${state.temperature.toLowerCase()}"]`);
+                    if (btn) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+        }
