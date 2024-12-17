@@ -114,7 +114,7 @@
                 <div id="analysisDashboard" class="card" style="display: none;">
                     <div class="card-body">
                         <!-- Quantum State Toolbar -->
-                        <div class="quantum-toolbar">
+                        <div class="quantum-toolbar" id="quantum-toolbar">
                             <button type="button" class="quantum-btn" data-state="absolute" title="Absolute - Highest certainty">💎</button>
                             <button type="button" class="quantum-btn" data-state="cold" title="Cold - Very high certainty">❄️</button>
                             <button type="button" class="quantum-btn" data-state="cool" title="Cool - High certainty">🌊</button>
@@ -222,34 +222,39 @@
         updateWave();
 
         // Quantum toolbar interaction
-        document.querySelectorAll('.quantum-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const state = btn.dataset.state;
-                const details = getStateDetails(state);
-                updateAnalysisCard(details);
-                
-                // Update definition
-                const definition = document.getElementById('stateDefinition');
-                definition.textContent = btn.title;
-                definition.style.opacity = '1';
-            });
-            
-            // Show/hide definition on hover
-            btn.addEventListener('mouseenter', () => {
-                const definition = document.getElementById('stateDefinition');
-                definition.textContent = btn.title;
-                definition.style.opacity = '1';
-            });
-            
-            btn.addEventListener('mouseleave', () => {
-                const definition = document.getElementById('stateDefinition');
-                const activeBtn = document.querySelector('.quantum-btn.active');
-                if (activeBtn) {
-                    definition.textContent = activeBtn.title;
-                } else {
-                    definition.style.opacity = '0';
-                }
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            const toolbar = document.getElementById('quantum-toolbar');
+            if (toolbar) {
+                toolbar.querySelectorAll('.quantum-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const state = btn.dataset.state;
+                        const details = getStateDetails(state);
+                        updateAnalysisCard(details);
+
+                        // Update definition
+                        const definition = document.getElementById('stateDefinition');
+                        definition.textContent = btn.title;
+                        definition.style.opacity = '1';
+                    });
+
+                    // Show/hide definition on hover
+                    btn.addEventListener('mouseenter', () => {
+                        const definition = document.getElementById('stateDefinition');
+                        definition.textContent = btn.title;
+                        definition.style.opacity = '1';
+                    });
+
+                    btn.addEventListener('mouseleave', () => {
+                        const definition = document.getElementById('stateDefinition');
+                        const activeBtn = document.querySelector('.quantum-btn.active');
+                        if (activeBtn) {
+                            definition.textContent = activeBtn.title;
+                        } else {
+                            definition.style.opacity = '0';
+                        }
+                    });
+                });
+            }
         });
 
         function getStateDetails(state) {
@@ -372,10 +377,10 @@
                 }
 
                 const data = await response.json();
-                
+
                 // Show dashboard and process quantum states
                 dashboard.style.display = 'block';
-                
+
                 // Update button states based on analysis
                 updateQuantumButtons(data.quantum_analysis.states);
                 const states = data.quantum_analysis.states;
@@ -390,15 +395,15 @@
                         'HOT': 5,
                         'PLASMA': 6
                     };
-                    
-                    const primaryState = states.sort((a, b) => 
+
+                    const primaryState = states.sort((a, b) =>
                         stateOrder[a.temperature] - stateOrder[b.temperature]
                     )[0];
 
                     // Update the state card
                     const stateCard = document.querySelector('.analysis-card');
                     const confidenceLevel = getConfidenceLevel(primaryState.temperature);
-                    
+
                     stateCard.querySelector('.state-emoji').textContent = primaryState.emoji;
                     stateCard.querySelector('.state-name').textContent = primaryState.temperature;
                     stateCard.querySelector('.gauge-value').textContent = `${Math.round(confidenceLevel * 100)}%`;
@@ -421,9 +426,9 @@
                     };
 
                     stateCard.querySelector('.statement-text').textContent = primaryState.statement;
-                    stateCard.querySelector('.state-characteristics').textContent = 
+                    stateCard.querySelector('.state-characteristics').textContent =
                         stateCharacteristics[primaryState.temperature] || '';
-                    
+
                     // Update states distribution
                     const statesDistribution = document.getElementById('statesDistribution');
                     statesDistribution.innerHTML = states.map(state => `
@@ -431,8 +436,8 @@
                             <span class="me-2">${state.emoji}</span>
                             <div class="flex-grow-1">
                                 <div class="progress" style="height: 8px;">
-                                    <div class="progress-bar bg-${getStateColor(state.temperature)}" 
-                                         role="progressbar" 
+                                    <div class="progress-bar bg-${getStateColor(state.temperature)}"
+                                         role="progressbar"
                                          style="width: ${getStatePercentage(state.temperature)}%">
                                     </div>
                                 </div>
@@ -440,7 +445,7 @@
                             <span class="ms-2 small">${state.temperature}</span>
                         </div>
                     `).join('');
-                    
+
                     // Update state transitions
                     const transitionPath = document.querySelector('.transition-path');
                     transitionPath.innerHTML = states.map((state, index) => `
@@ -466,7 +471,7 @@
                         </div>
                     `).join('');
                 }
-                
+
             } catch (error) {
                 console.error('Error:', error);
                 dashboard.querySelector('.card-body').innerHTML = `
@@ -494,13 +499,13 @@
             };
             return confidenceLevels[temperature] || 0.5;
         }
-    // Update quantum buttons based on analysis states
+        // Update quantum buttons based on analysis states
         function updateQuantumButtons(states) {
             // Reset all buttons
             document.querySelectorAll('.quantum-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             // Map each state to its button and activate
             if (states && states.length > 0) {
                 states.forEach(state => {
@@ -511,7 +516,7 @@
                 });
             }
         }
-    // Helper functions for state visualization
+        // Helper functions for state visualization
         function getStateColor(temperature) {
             const colors = {
                 'ABSOLUTE': 'primary',
