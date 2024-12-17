@@ -79,42 +79,6 @@
             border-radius: 8px;
             padding: 1rem;
             margin-bottom: 1rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            overflow: hidden;
-        }
-        .analysis-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-        .card-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        .card-content.expanded {
-            max-height: 1000px;
-            transition: max-height 0.5s ease-in;
-        }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 0.5rem;
-        }
-        .card-toggle {
-            transform: rotate(0deg);
-            transition: transform 0.3s ease;
-        }
-        .card-toggle.expanded {
-            transform: rotate(180deg);
-        }
-        .fade-in {
-            opacity: 0;
-            animation: fadeIn 0.5s forwards;
-        }
-        @keyframes fadeIn {
-            to { opacity: 1; }
         }
     </style>
 </head>
@@ -219,13 +183,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="analysis-card">
-                                    <div class="card-header">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="state-emoji"></span>
-                                            <span class="state-name fw-bold"></span>
-                                        </div>
-                                        <span class="card-toggle">▼</span>
-                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="state-emoji">❄️</span>
                                             <span class="state-name fw-bold">COLD</span>
@@ -297,10 +255,7 @@
         // Wave animation
         function updateWave() {
             const paths = document.querySelectorAll('.wave-path');
-            if (!paths.length) {
-                requestAnimationFrame(updateWave);
-                return;
-            }
+            if (!paths.length) return;
             
             const width = 100;
             const height = 30;
@@ -314,25 +269,16 @@
                 points.push(`${x},${y}`);
             }
 
-            const pathData = `M ${points.join(' L ')}`;
             paths.forEach(path => {
-                try {
-                    if (path && path.setAttribute) {
-                        path.setAttribute('d', pathData);
-                    }
-                } catch (e) {
-                    console.warn('Error updating wave path:', e);
-                }
+                path.setAttribute('d', `M ${points.join(' L ')}`);
             });
             requestAnimationFrame(updateWave);
         }
 
-        // Initialize wave animation only after analysis is complete
-        function startWaveAnimation() {
-            if (document.querySelector('.wave-path')) {
-                updateWave();
-            }
-        }
+        // Initialize wave animation after DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            updateWave();
+        });
 
         // Quantum toolbar interaction
         document.addEventListener('DOMContentLoaded', function() {
@@ -562,63 +508,19 @@
                         stateOrder[a.temperature] - stateOrder[b.temperature]
                     )[0];
 
-                    // Initialize card toggling
-                    document.querySelectorAll('.analysis-card').forEach(card => {
-                        const header = card.querySelector('.card-header');
-                        const content = card.querySelector('.card-content');
-                        const toggle = card.querySelector('.card-toggle');
-                        
-                        if (header && content && toggle) {
-                            header.addEventListener('click', () => {
-                                content.classList.toggle('expanded');
-                                toggle.classList.toggle('expanded');
-                                
-                                // Trigger fade animation on content
-                                if (content.classList.contains('expanded')) {
-                                    content.querySelectorAll('.fade-in').forEach(el => {
-                                        if (el) {
-                                            el.style.opacity = 0;
-                                            void el.offsetWidth; // Trigger reflow
-                                            el.style.opacity = 1;
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-
                     // Update the state card
                     const stateCard = document.querySelector('.analysis-card');
-                    if (!stateCard) return;
-                    
                     const confidenceLevel = getConfidenceLevel(primaryState.temperature);
 
-                    // Wrap card content in expandable container
-                    const cardContent = stateCard.querySelector('.details-content');
-                    if (cardContent && !cardContent.closest('.card-content')) {
-                        const contentWrapper = document.createElement('div');
-                        contentWrapper.className = 'card-content fade-in';
-                        if (cardContent.parentNode) {
-                            cardContent.parentNode.insertBefore(contentWrapper, cardContent);
-                            contentWrapper.appendChild(cardContent);
-                        }
-                    }
-
-                    const stateEmoji = stateCard.querySelector('.state-emoji');
-                    const stateName = stateCard.querySelector('.state-name');
-                    const gaugeValue = stateCard.querySelector('.gauge-value');
-                    const gaugePath = stateCard.querySelector('.gauge-path');
-
-                    if (stateEmoji) stateEmoji.textContent = primaryState.emoji;
-                    if (stateName) stateName.textContent = primaryState.temperature;
-                    if (gaugeValue) gaugeValue.textContent = `${Math.round(confidenceLevel * 100)}%`;
+                    stateCard.querySelector('.state-emoji').textContent = primaryState.emoji;
+                    stateCard.querySelector('.state-name').textContent = primaryState.temperature;
+                    stateCard.querySelector('.gauge-value').textContent = `${Math.round(confidenceLevel * 100)}%`;
 
                     // Update gauge
-                    if (gaugePath) {
-                        const gaugeLength = gaugePath.getTotalLength();
-                        const gaugeProgress = confidenceLevel * gaugeLength;
-                        gaugePath.style.strokeDasharray = `${gaugeProgress} ${gaugeLength}`;
-                    }
+                    const gaugePath = stateCard.querySelector('.gauge-path');
+                    const gaugeLength = gaugePath.getTotalLength();
+                    const gaugeProgress = confidenceLevel * gaugeLength;
+                    gaugePath.style.strokeDasharray = `${gaugeProgress} ${gaugeLength}`;
 
                     // Update content
                     const stateCharacteristics = {
@@ -634,11 +536,6 @@
                     stateCard.querySelector('.statement-text').textContent = primaryState.statement;
                     stateCard.querySelector('.state-characteristics').textContent =
                         stateCharacteristics[primaryState.temperature] || '';
-
-                    // Start wave animation after a short delay to ensure DOM is ready
-                    setTimeout(() => {
-                        startWaveAnimation();
-                    }, 100);
 
                     // Update states distribution
                     const statesDistribution = document.getElementById('statesDistribution');
