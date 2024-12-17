@@ -113,6 +113,59 @@
                 <!-- Analysis Dashboard -->
                 <div id="analysisDashboard" class="card" style="display: none;">
                     <div class="card-body">
+                        <h5 class="card-title">Quantum Analysis Results</h5>
+                        
+                        <!-- Detailed States Analysis -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Quantum States Analysis</h6>
+                            <div id="statesAnalysis" class="analysis-section">
+                                <div class="mb-3">
+                                    <strong>Absolute States (💎):</strong>
+                                    <div class="states-list absolute-states"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Cold States (❄️):</strong>
+                                    <div class="states-list cold-states"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Cool States (🌊):</strong>
+                                    <div class="states-list cool-states"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Tepid States (🌡️):</strong>
+                                    <div class="states-list tepid-states"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Warm States (☀️):</strong>
+                                    <div class="states-list warm-states"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Hot States (🔥):</strong>
+                                    <div class="states-list hot-states"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Plasma States (⚡):</strong>
+                                    <div class="states-list plasma-states"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Entanglements Analysis -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Quantum Entanglements</h6>
+                            <div id="entanglementsAnalysis" class="analysis-section">
+                                <div class="entanglements-list"></div>
+                            </div>
+                        </div>
+
+                        <!-- State Distribution -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">State Distribution</h6>
+                            <div id="stateDistribution" class="analysis-section">
+                                <div class="distribution-stats"></div>
+                            </div>
+                        </div>
+                    <div class="card-body">
                         <!-- Quantum State Toolbar -->
                         <div class="quantum-toolbar" id="quantum-toolbar">
                             <button type="button" class="quantum-btn" data-state="absolute" title="Absolute - Highest certainty">💎</button>
@@ -383,9 +436,58 @@
                 }
 
                 const data = await response.json();
-
+                
                 // Show dashboard and process quantum states
                 dashboard.style.display = 'block';
+                
+                // Process and display states
+                const stateCategories = {
+                    'ABSOLUTE': '.absolute-states',
+                    'COLD': '.cold-states',
+                    'COOL': '.cool-states',
+                    'TEPID': '.tepid-states',
+                    'WARM': '.warm-states',
+                    'HOT': '.hot-states',
+                    'PLASMA': '.plasma-states'
+                };
+
+                // Clear previous results
+                Object.values(stateCategories).forEach(selector => {
+                    document.querySelector(selector).innerHTML = '';
+                });
+                document.querySelector('.entanglements-list').innerHTML = '';
+                document.querySelector('.distribution-stats').innerHTML = '';
+
+                // Process states
+                const stateCount = {};
+                data.quantum_analysis.states.forEach(state => {
+                    stateCount[state.temperature] = (stateCount[state.temperature] || 0) + 1;
+                    const stateElement = document.createElement('div');
+                    stateElement.className = 'state-item mb-2';
+                    stateElement.textContent = `${state.emoji} ${state.statement}`;
+                    document.querySelector(stateCategories[state.temperature]).appendChild(stateElement);
+                });
+
+                // Process entanglements
+                const entanglementsContainer = document.querySelector('.entanglements-list');
+                data.quantum_analysis.entanglements.forEach(entanglement => {
+                    const entanglementElement = document.createElement('div');
+                    entanglementElement.className = 'entanglement-item mb-2';
+                    entanglementElement.innerHTML = `
+                        <strong>🔄 Strength: ${entanglement.strength}/5</strong><br>
+                        ${entanglement.source} → ${entanglement.target}
+                    `;
+                    entanglementsContainer.appendChild(entanglementElement);
+                });
+
+                // Display distribution stats
+                const distributionContainer = document.querySelector('.distribution-stats');
+                Object.entries(stateCount).forEach(([temperature, count]) => {
+                    const statElement = document.createElement('div');
+                    statElement.className = 'distribution-item mb-2';
+                    statElement.textContent = `${temperature}: ${count} statement(s)`;
+                    distributionContainer.appendChild(statElement);
+                });
 
                 // Update button states based on analysis
                 updateQuantumButtons(data.quantum_analysis.states);
