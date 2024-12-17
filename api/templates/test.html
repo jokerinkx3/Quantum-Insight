@@ -40,6 +40,16 @@
         }
         .quantum-btn.active {
             background: var(--bs-primary);
+            box-shadow: 0 0 15px var(--bs-primary);
+            transform: scale(1.1);
+        }
+        .state-definition {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: var(--bs-gray-800);
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
         }
         .wave-container {
             height: 30px;
@@ -98,37 +108,23 @@
                     </div>
                 </div>
 
-                <!-- Emoji Legend -->
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h6 class="mb-3">Quantum State Legend</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-2"><span class="me-2">💎</span>Absolute - Highest certainty</div>
-                                <div class="mb-2"><span class="me-2">❄️</span>Cold - Very high certainty</div>
-                                <div class="mb-2"><span class="me-2">🌊</span>Cool - High certainty</div>
-                                <div class="mb-2"><span class="me-2">🌡️</span>Tepid - Moderate certainty</div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-2"><span class="me-2">☀️</span>Warm - Low certainty</div>
-                                <div class="mb-2"><span class="me-2">🔥</span>Hot - Very low certainty</div>
-                                <div class="mb-2"><span class="me-2">⚡</span>Plasma - Highly uncertain/speculative</div>
-                                <div class="mb-2"><span class="me-2">🔄</span>Entanglement - Shows relationships</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
 
                 <!-- Analysis Dashboard -->
                 <div id="analysisDashboard" class="card" style="display: none;">
                     <div class="card-body">
                         <!-- Quantum State Toolbar -->
                         <div class="quantum-toolbar">
-                            <button type="button" class="quantum-btn" data-state="cold">❄️</button>
-                            <button type="button" class="quantum-btn" data-state="causal">🔄</button>
-                            <button type="button" class="quantum-btn" data-state="entangled">⚡️</button>
-                            <button type="button" class="quantum-btn" data-state="superposition">🌊</button>
+                            <button type="button" class="quantum-btn" data-state="absolute" title="Absolute - Highest certainty">💎</button>
+                            <button type="button" class="quantum-btn" data-state="cold" title="Cold - Very high certainty">❄️</button>
+                            <button type="button" class="quantum-btn" data-state="cool" title="Cool - High certainty">🌊</button>
+                            <button type="button" class="quantum-btn" data-state="tepid" title="Tepid - Moderate certainty">🌡️</button>
+                            <button type="button" class="quantum-btn" data-state="warm" title="Warm - Low certainty">☀️</button>
+                            <button type="button" class="quantum-btn" data-state="hot" title="Hot - Very low certainty">🔥</button>
+                            <button type="button" class="quantum-btn" data-state="plasma" title="Plasma - Highly uncertain">⚡</button>
+                            <button type="button" class="quantum-btn" data-state="entangled" title="Entanglement - Shows relationships">🔄</button>
                         </div>
+                        <div id="stateDefinition" class="state-definition"></div>
 
                         <!-- Analysis Results -->
                         <div class="row">
@@ -213,6 +209,28 @@
                 const state = btn.dataset.state;
                 const details = getStateDetails(state);
                 updateAnalysisCard(details);
+                
+                // Update definition
+                const definition = document.getElementById('stateDefinition');
+                definition.textContent = btn.title;
+                definition.style.opacity = '1';
+            });
+            
+            // Show/hide definition on hover
+            btn.addEventListener('mouseenter', () => {
+                const definition = document.getElementById('stateDefinition');
+                definition.textContent = btn.title;
+                definition.style.opacity = '1';
+            });
+            
+            btn.addEventListener('mouseleave', () => {
+                const definition = document.getElementById('stateDefinition');
+                const activeBtn = document.querySelector('.quantum-btn.active');
+                if (activeBtn) {
+                    definition.textContent = activeBtn.title;
+                } else {
+                    definition.style.opacity = '0';
+                }
             });
         });
 
