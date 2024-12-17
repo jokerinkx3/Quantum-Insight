@@ -311,16 +311,21 @@
                 points.push(`${x},${y}`);
             }
 
+            const pathData = `M ${points.join(' L ')}`;
             paths.forEach(path => {
-                path.setAttribute('d', `M ${points.join(' L ')}`);
+                if (path) {
+                    path.setAttribute('d', pathData);
+                }
             });
             requestAnimationFrame(updateWave);
         }
 
-        // Initialize wave animation after DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            updateWave();
-        });
+        // Initialize wave animation only after analysis is complete
+        function startWaveAnimation() {
+            if (document.querySelector('.wave-path')) {
+                updateWave();
+            }
+        }
 
         // Quantum toolbar interaction
         document.addEventListener('DOMContentLoaded', function() {
@@ -608,6 +613,9 @@
                     stateCard.querySelector('.statement-text').textContent = primaryState.statement;
                     stateCard.querySelector('.state-characteristics').textContent =
                         stateCharacteristics[primaryState.temperature] || '';
+
+                    // Start wave animation
+                    startWaveAnimation();
 
                     // Update states distribution
                     const statesDistribution = document.getElementById('statesDistribution');
