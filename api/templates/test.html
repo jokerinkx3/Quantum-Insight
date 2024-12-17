@@ -236,33 +236,61 @@
 
         function getStateDetails(state) {
             const states = {
+                absolute: {
+                    emoji: '💎',
+                    name: 'ABSOLUTE',
+                    confidence: 100,
+                    description: 'Highest certainty state',
+                    evidence: ['Absolute truth', 'Undisputed facts']
+                },
                 cold: {
                     emoji: '❄️',
                     name: 'COLD',
                     confidence: 85,
-                    description: 'High certainty state based on empirical evidence',
+                    description: 'Very high certainty state',
                     evidence: ['Multiple peer-reviewed sources', 'Empirical data support']
                 },
-                causal: {
-                    emoji: '🔄',
-                    name: 'CAUSAL',
-                    confidence: 75,
-                    description: 'Strong causal relationship identified',
-                    evidence: ['Direct correlation observed', 'Temporal sequence verified']
+                cool: {
+                    emoji: '🌊',
+                    name: 'COOL',
+                    confidence: 70,
+                    description: 'High certainty state',
+                    evidence: ['Strong evidence', 'Reliable sources']
+                },
+                tepid: {
+                    emoji: '🌡️',
+                    name: 'TEPID',
+                    confidence: 50,
+                    description: 'Moderate certainty state',
+                    evidence: ['Mixed evidence', 'Some uncertainty']
+                },
+                warm: {
+                    emoji: '☀️',
+                    name: 'WARM',
+                    confidence: 35,
+                    description: 'Low certainty state',
+                    evidence: ['Limited evidence', 'Significant uncertainty']
+                },
+                hot: {
+                    emoji: '🔥',
+                    name: 'HOT',
+                    confidence: 20,
+                    description: 'Very low certainty state',
+                    evidence: ['Minimal evidence', 'High speculation']
+                },
+                plasma: {
+                    emoji: '⚡',
+                    name: 'PLASMA',
+                    confidence: 10,
+                    description: 'Highly uncertain state',
+                    evidence: ['Pure speculation', 'Theoretical only']
                 },
                 entangled: {
-                    emoji: '⚡️',
+                    emoji: '🔄',
                     name: 'ENTANGLED',
-                    confidence: 95,
-                    description: 'Quantum entanglement detected',
-                    evidence: ['Strong correlation', 'Bidirectional influence']
-                },
-                superposition: {
-                    emoji: '🌊',
-                    name: 'SUPERPOSITION',
                     confidence: 50,
-                    description: 'Multiple concurrent states detected',
-                    evidence: ['State uncertainty', 'Multiple possibilities']
+                    description: 'Shows relationships between states',
+                    evidence: ['Connected concepts', 'Interdependent factors']
                 }
             };
             return states[state];
